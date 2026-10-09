@@ -1,32 +1,33 @@
 package main
 
 import (
-	"golang-auth/internal/httpserver"
+	"context"
 	"golang-auth/internal/app"
+	"golang-auth/internal/httpserver"
 
-	"time"
-	"net/http"
 	"log"
+	"net/http"
+	"time"
 )
 
-func main(){
+func main() {
 	ctx := context.Background()
-	
-	a,err := app.New(ctx)
+
+	a, err := app.New(ctx)
 	if err != nil {
 		log.Fatalf("Failed to initialize app: %v", err)
 	}
 
 	defer func() {
-		if err := a.Close(ctx); err != nil {
+		if err := a.Close(); err != nil {
 			log.Printf("Failed to close app: %v", err)
 		}
 		log.Println("App closed successfully")
-	}
-	router := httpserver.NewRouter()
+	}()
+	router := httpserver.NewRouter(a)
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: router,
+		Addr:              ":8080",
+		Handler:           router,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

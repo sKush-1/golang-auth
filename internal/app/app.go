@@ -1,22 +1,25 @@
-package app 
-import(
-	"golang-auth/internal/config",
-	"go.mongodb.org/mongo-driver/mongo"
+package app
+
+import (
+	"context"
+	"fmt"
 	"golang-auth/internal/config"
 	"golang-auth/internal/db"
+	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type App struct {
-	Config config.Config
+	Config      config.Config
 	MongoClient *mongo.Client
-	DB *mongo.Database
+	DB          *mongo.Database
 }
 
-func New(ctx context.Context) {App, error}{
+func New(ctx context.Context) (*App, error) {
 	cfg, err := config.Load()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	mongoClient, err := db.Connect(ctx, cfg)
@@ -25,19 +28,18 @@ func New(ctx context.Context) {App, error}{
 	}
 
 	return &App{
-		Config: cfg,
+		Config:      cfg,
 		MongoClient: mongoClient.Client,
-		DB: mongoClient.DB
+		DB:          mongoClient.DB,
 	}, nil
 }
 
-func (a *App ) Close(ctx context.Context) error {
-	if a.MongoClient != nil {
-		return a.MongoClient.Disconnect(ctx)
+func (a *App) Close() error {
+	if a.MongoClient == nil {
+		return nil
 	}
-	return nil
 
-	closeCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	closeCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := a.MongoClient.Disconnect(closeCtx); err != nil {

@@ -1,12 +1,17 @@
 package db
 
 import (
+	"context"
+	"golang-auth/internal/config"
+	"time"
+
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Mongo struct {
-		Client *mongo.Client
-		DB	 *mongo.Database	
+	Client *mongo.Client
+	DB     *mongo.Database
 }
 
 func Connect(ctx context.Context, cfg config.Config) (*Mongo, error) {
