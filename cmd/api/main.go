@@ -4,6 +4,7 @@ import (
 	"context"
 	"golang-auth/internal/app"
 	"golang-auth/internal/httpserver"
+	"golang-auth/internal/user"
 
 	"log"
 	"net/http"
@@ -16,6 +17,11 @@ func main() {
 	a, err := app.New(ctx)
 	if err != nil {
 		log.Fatalf("Failed to initialize app: %v", err)
+	}
+
+	userRepo := user.NewRepo(a.DB)
+	if err := userRepo.EnsureEmailUniqueIndex(ctx); err != nil {
+		log.Fatalf("Failed to initialize user indexes: %v", err)
 	}
 
 	defer func() {
